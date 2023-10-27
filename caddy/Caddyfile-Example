@@ -1,0 +1,76 @@
+# Serve requests only for virtual host set in environment variable
+
+{$CADDYHOST}
+
+# Bind Virtual Host to address set in environment
+
+bind {$CADDYBIND}
+
+# Registration email for automated issuing of Lets Encrypt certs
+
+tls {$CADDYEMAIL}
+
+# Define the web server root (using environment variable)
+
+root /srv/caddy/{$CADDYROOT}
+
+# Redirect HTTP to HTTPS
+
+redir {
+if {scheme} is http
+/ https://{host}{uri}
+}
+
+# HTTP Basic auth - password set by environment variables
+
+basicauth /private {$BASICUSER} {$BASICPASS}
+
+# Allow directory browsing under /private
+
+browse /private
+
+# Apply templating only to /pricate/templates
+
+templates /private/templates
+
+# Expose Caddy runtime stats at /private/stats
+
+expvar /private/stats
+
+# Dynamically render /public/\*.md as markdown (css optional)
+
+markdown /public {
+ext .md
+css markdown.css
+}
+
+# Add file extensions to unqualified requests - try until matched
+
+ext .html .txt
+
+# Add/Modify the response headers
+
+header / X-Frame-Options "DENY"
+
+# Proxy example - response will include ip of client and caddy
+
+proxy /proxy https://checkip.amazonaws.com
+
+# Enable Compression
+
+gzip {
+level 4
+not /proxy
+}
+
+# Error page example
+
+errors {
+404 error/404.html
+
+- error/catchall.html
+  }
+
+# Log request to stdout in the followings format
+
+log / stdout "{>X-Forwarded-For} {remote} - {user} [{when}] \"{method} {uri} {proto}\" {status} {size} \"{>Referer}\" \"{>User-Agent}\""

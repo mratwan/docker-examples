@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+    # Run the node application
+    nodejs:
+        container_name: nodejs
+        restart: unless-stopped
+        environment: 
+            - NODE_ENV=production
+        build:
+            context: ./
+        expose:
+            - 3000
+        ports:
+            - "3000:3000"

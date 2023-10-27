@@ -1,0 +1,31 @@
+version: '3.1'
+services:
+    mariadb:
+        image: 'mariadb:10.6'
+        expose:
+            - "3306"
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: ''
+            MYSQL_USER: 'root'
+            MYSQL_PASSWORD: ''
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - 'mariadb:/var/lib/mysql'
+        # networks:
+        #     - docker
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${password}'
+            retries: 3
+            timeout: 5s
+# networks:
+#     docker:
+#         driver: bridge
+volumes:
+    mariadb:
+        driver: local
